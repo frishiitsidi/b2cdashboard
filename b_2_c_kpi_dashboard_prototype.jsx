@@ -1739,6 +1739,9 @@ export default function B2CKPIDashboardPrototype() {
     setLoading(true);
     setDbError(null);
     try {
+      if (!supabase) {
+        throw new Error("Supabase client is not initialized. Please verify that VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are correctly configured as environment variables in your Netlify settings, and then trigger a new deploy.");
+      }
       const { data: dbRoles, error: rolesError } = await supabase.from("roles").select("*").order("name");
       if (rolesError) throw rolesError;
       
