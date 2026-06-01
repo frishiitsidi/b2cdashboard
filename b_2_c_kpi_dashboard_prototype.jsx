@@ -333,6 +333,90 @@ function makeWeekEntries(weekId, values) {
   }));
 }
 
+function getWeekRange(week) {
+  const seeded = {
+    w1: { start: new Date("2026-06-03"), end: new Date("2026-06-07"), month: "June 2026", quarter: "Q2 2026" },
+    w2: { start: new Date("2026-06-10"), end: new Date("2026-06-14"), month: "June 2026", quarter: "Q2 2026" },
+    w3: { start: new Date("2026-06-17"), end: new Date("2026-06-21"), month: "June 2026", quarter: "Q2 2026" },
+    w4: { start: new Date("2026-06-24"), end: new Date("2026-06-28"), month: "June 2026", quarter: "Q2 2026" },
+  };
+  if (seeded[week.id]) return seeded[week.id];
+  return { start: new Date(week.created_at || Date.now()), end: new Date(week.created_at || Date.now()), month: "June 2026", quarter: "Q2 2026" };
+}
+
+function getEntriesForRange(entries, kpis, weeks, horizon, horizonValue, customRange) {
+  let activeWeeks = [];
+  if (horizon === "week") {
+    activeWeeks = weeks.filter(w => w.id === horizonValue);
+  } else if (horizon === "month") {
+    activeWeeks = weeks.filter(w => getWeekRange(w).month === horizonValue);
+  } else if (horizon === "quarter") {
+    activeWeeks = weeks.filter(w => getWeekRange(w).quarter === horizonValue);
+  } else if (horizon === "custom") {
+    const start = new Date(customRange.start);
+    const end = new Date(customRange.end);
+    activeWeeks = weeks.filter(w => {
+      const range = getWeekRange(w);
+      return range.start <= end && range.end >= start;
+    });
+  }
+
+  const activeWeekIds = activeWeeks.map(w => w.id);
+
+  return kpis.map(def => {
+    const kpiEntries = entries.filter(e => e.kpiId === def.id && activeWeekIds.includes(e.weekId));
+
+    if (kpiEntries.length === 0) {
+      return { def, entry: null };
+    }
+
+    const aggEntry = {
+      id: `agg-${def.id}`,
+      kpiId: def.id,
+      weekId: horizonValue || "range",
+      notes: `${kpiEntries.length} week(s) aggregated.`,
+      blocker: "No blocker",
+      nextAction: "",
+      updatedBy: "Aggregated",
+      updatedAt: new Date().toISOString()
+    };
+
+    if (def.inputType === "currency_direct") {
+      aggEntry.actual = kpiEntries.reduce((sum, e) => sum + Number(e.actual || 0), 0);
+    } else if (def.inputType === "calculated_rate") {
+      aggEntry.numerator = kpiEntries.reduce((sum, e) => sum + Number(e.numerator || 0), 0);
+      aggEntry.denominator = kpiEntries.reduce((sum, e) => sum + Number(e.denominator || 0), 0);
+    } else if (def.inputType === "checklist") {
+      const lists = kpiEntries.map(e => e.checklist).filter(Boolean);
+      aggEntry.checklist = lists.length > 0 ? lists[lists.length - 1] : [];
+    } else if (def.inputType === "status") {
+      const statuses = kpiEntries.map(e => e.actual).filter(Boolean);
+      if (statuses.includes("Off Track")) {
+        aggEntry.actual = "Off Track";
+      } else if (statuses.includes("Needs Attention")) {
+        aggEntry.actual = "Needs Attention";
+      } else {
+        aggEntry.actual = "On Track";
+      }
+    } else {
+      const total = kpiEntries.reduce((sum, e) => sum + Number(e.actual || 0), 0);
+      if (def.inputType === "number_direct_lower_is_better") {
+        aggEntry.actual = Math.round((total / kpiEntries.length) * 10) / 10;
+      } else {
+        aggEntry.actual = total;
+      }
+    }
+
+    const activeBlockers = kpiEntries.map(e => e.blocker).filter(b => b && b !== "No blocker" && b !== "—");
+    aggEntry.blocker = activeBlockers.length > 0 ? activeBlockers[0] : "No blocker";
+
+    const activeActions = kpiEntries.map(e => e.nextAction).filter(Boolean);
+    aggEntry.nextAction = activeActions.length > 0 ? activeActions.join("; ") : "Maintain current rhythm.";
+
+    return { def, entry: aggEntry };
+  });
+}
+
 function getDefinition(kpiId, kpis = []) {
   return kpis.find((k) => k.id === kpiId) || kpiDefinitions.find((k) => k.id === kpiId);
 }
@@ -423,7 +507,21 @@ function getActivePrimary(active) {
   return active;
 }
 
-function Header({ active, setActive, weekId, setWeekId, weeks }) {
+function Header({ 
+  active, 
+  setActive, 
+  weekId, 
+  setWeekId, 
+  weeks,
+  timeHorizon,
+  setTimeHorizon,
+  selectedMonth,
+  setSelectedMonth,
+  selectedQuarter,
+  setSelectedQuarter,
+  customRange,
+  setCustomRange
+}) {
   const week = weeks.find((w) => w.id === weekId);
   const activePrimary = getActivePrimary(active);
   const showKpiSubnav = activePrimary === "kpi";
@@ -433,51 +531,124 @@ function Header({ active, setActive, weekId, setWeekId, weeks }) {
     return setActive(id);
   }
 
+  const monthOptions = ["June 2026"];
+  const quarterOptions = ["Q2 2026"];
+
   return (
     <div className="sticky top-0 z-30 border-b border-black/5 bg-[#f5f5f7]/80 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <button onClick={() => setActive("home")} className="flex items-center gap-3 rounded-3xl pr-3 text-left transition hover:opacity-75">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-black text-white shadow-sm">
-            <Sparkles size={18} />
+      <div className="mx-auto flex flex-col gap-4 px-6 py-4 max-w-7xl md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center justify-between">
+          <button onClick={() => setActive("home")} className="flex items-center gap-3 rounded-3xl pr-3 text-left transition hover:opacity-75">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-black text-white shadow-sm">
+              <Sparkles size={18} />
+            </div>
+            <div>
+              <div className="text-sm font-semibold tracking-tight text-[#1d1d1f]">MAPID B2C</div>
+              <div className="text-xs text-[#6e6e73]">Growth Operating System · MVP</div>
+            </div>
+          </button>
+          
+          <div className="md:hidden flex items-center gap-1 text-xs text-[#6e6e73]">
+            {timeHorizon === "week" && (week?.status === "locked" ? <Lock size={12} /> : <LockOpen size={12} />)}
+            <span className="capitalize">{timeHorizon}</span>
           </div>
-          <div>
-            <div className="text-sm font-semibold tracking-tight text-[#1d1d1f]">MAPID B2C</div>
-            <div className="text-xs text-[#6e6e73]">Growth Operating System · MVP</div>
-          </div>
-        </button>
+        </div>
 
-        <nav className="hidden items-center gap-1 rounded-full bg-white/90 p-1 shadow-sm ring-1 ring-black/5 lg:flex">
-          {primaryNavItems.map((item) => {
-            const Icon = item.icon;
-            const selected = activePrimary === item.id;
-            return (
+        <div className="flex items-center justify-center">
+          <div className="flex rounded-full bg-white/90 p-1 shadow-sm ring-1 ring-black/5">
+            {["week", "month", "quarter", "custom"].map((h) => (
               <button
-                key={item.id}
-                onClick={() => handlePrimaryClick(item.id)}
-                className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm transition ${
-                  selected ? "bg-black text-white" : "text-[#6e6e73] hover:bg-neutral-100 hover:text-[#1d1d1f]"
+                key={h}
+                onClick={() => setTimeHorizon(h)}
+                className={`rounded-full px-3 py-1.5 text-xs font-medium capitalize transition ${
+                  timeHorizon === h ? "bg-black text-white shadow-sm" : "text-[#6e6e73] hover:text-[#1d1d1f]"
                 }`}
               >
-                <Icon size={15} />
-                <span className="hidden xl:inline">{item.label}</span>
-                <span className="xl:hidden">{item.label.split(" ")[0]}</span>
+                {h}
               </button>
-            );
-          })}
-        </nav>
-
-        <div className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm shadow-sm ring-1 ring-black/5">
-          {week?.status === "locked" ? <Lock size={15} className="text-[#6e6e73]" /> : <Clock3 size={15} className="text-[#6e6e73]" />}
-          <select value={weekId} onChange={(e) => setWeekId(e.target.value)} className="max-w-[150px] bg-transparent text-[#1d1d1f] outline-none md:max-w-none">
-            {weeks.map((w) => (
-              <option key={w.id} value={w.id}>{w.label}</option>
             ))}
-          </select>
-          <ChevronDown size={14} className="text-[#6e6e73]" />
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-end gap-3">
+          <nav className="hidden items-center gap-1 rounded-full bg-white/90 p-1 shadow-sm ring-1 ring-black/5 lg:flex mr-2">
+            {primaryNavItems.map((item) => {
+              const Icon = item.icon;
+              const selected = activePrimary === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handlePrimaryClick(item.id)}
+                  className={`flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
+                    selected ? "bg-black text-white" : "text-[#6e6e73] hover:bg-neutral-100 hover:text-[#1d1d1f]"
+                  }`}
+                >
+                  <Icon size={13} />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+
+          <div className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-medium shadow-sm ring-1 ring-black/5 w-full md:w-auto justify-center">
+            {timeHorizon === "week" && (
+              <>
+                {week?.status === "locked" ? <Lock size={14} className="text-[#6e6e73]" /> : <LockOpen size={14} className="text-[#6e6e73]" />}
+                <select value={weekId} onChange={(e) => setWeekId(e.target.value)} className="bg-transparent text-[#1d1d1f] outline-none max-w-[150px] font-semibold cursor-pointer">
+                  {weeks.map((w) => (
+                    <option key={w.id} value={w.id}>{w.label}</option>
+                  ))}
+                </select>
+                <ChevronDown size={12} className="text-[#6e6e73]" />
+              </>
+            )}
+
+            {timeHorizon === "month" && (
+              <>
+                <CalendarDays size={14} className="text-[#6e6e73]" />
+                <select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} className="bg-transparent text-[#1d1d1f] outline-none font-semibold cursor-pointer">
+                  {monthOptions.map((m) => (
+                    <option key={m} value={m}>{m}</option>
+                  ))}
+                </select>
+                <ChevronDown size={12} className="text-[#6e6e73]" />
+              </>
+            )}
+
+            {timeHorizon === "quarter" && (
+              <>
+                <Archive size={14} className="text-[#6e6e73]" />
+                <select value={selectedQuarter} onChange={(e) => setSelectedQuarter(e.target.value)} className="bg-transparent text-[#1d1d1f] outline-none font-semibold cursor-pointer">
+                  {quarterOptions.map((q) => (
+                    <option key={q} value={q}>{q}</option>
+                  ))}
+                </select>
+                <ChevronDown size={12} className="text-[#6e6e73]" />
+              </>
+            )}
+
+            {timeHorizon === "custom" && (
+              <div className="flex items-center gap-1.5 font-semibold">
+                <input 
+                  type="date" 
+                  value={customRange.start} 
+                  onChange={(e) => setCustomRange({ ...customRange, start: e.target.value })} 
+                  className="bg-transparent text-[#1d1d1f] outline-none border-0 p-0 text-xs w-[100px] cursor-pointer"
+                />
+                <span className="text-[#a1a1a6]">to</span>
+                <input 
+                  type="date" 
+                  value={customRange.end} 
+                  onChange={(e) => setCustomRange({ ...customRange, end: e.target.value })} 
+                  className="bg-transparent text-[#1d1d1f] outline-none border-0 p-0 text-xs w-[100px] cursor-pointer"
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-6 pb-4 lg:hidden">
+      <div className="mx-auto flex gap-2 overflow-x-auto px-6 pb-4 lg:hidden scrollbar-none">
         {primaryNavItems.map((item) => {
           const Icon = item.icon;
           const selected = activePrimary === item.id;
@@ -485,11 +656,11 @@ function Header({ active, setActive, weekId, setWeekId, weeks }) {
             <button
               key={item.id}
               onClick={() => handlePrimaryClick(item.id)}
-              className={`flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm transition ${
+              className={`flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition ${
                 selected ? "bg-black text-white" : "bg-white text-[#6e6e73] ring-1 ring-black/5"
               }`}
             >
-              <Icon size={15} />
+              <Icon size={14} />
               {item.label}
             </button>
           );
@@ -498,15 +669,15 @@ function Header({ active, setActive, weekId, setWeekId, weeks }) {
 
       {showKpiSubnav && (
         <div className="border-t border-black/[0.03] bg-[#f5f5f7]/60">
-          <div className="mx-auto flex max-w-7xl items-center gap-2 overflow-x-auto px-6 py-3">
-            <div className="mr-2 hidden text-xs font-medium uppercase tracking-wide text-[#a1a1a6] md:block">KPI</div>
+          <div className="mx-auto flex items-center gap-2 overflow-x-auto px-6 py-3 max-w-7xl">
+            <div className="mr-2 hidden text-xs font-bold uppercase tracking-widest text-[#a1a1a6] md:block">KPI NAVIGATION</div>
             {kpiSubNavItems.map((item) => {
               const selected = active === item.id;
               return (
                 <button
                   key={item.id}
                   onClick={() => setActive(item.id)}
-                  className={`shrink-0 rounded-full px-3.5 py-1.5 text-sm transition ${
+                  className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
                     selected ? "bg-white text-[#1d1d1f] shadow-sm ring-1 ring-black/5" : "text-[#6e6e73] hover:text-[#1d1d1f]"
                   }`}
                 >
@@ -718,18 +889,35 @@ function InfoBlock({ label, value, clamp }) {
   return <div><div className="text-xs font-medium uppercase tracking-wide text-[#a1a1a6]">{label}</div><div className={`mt-1 text-sm leading-6 text-[#6e6e73] ${clamp ? "line-clamp-2" : ""}`}>{value}</div></div>;
 }
 
-function KpiTracking({ roles, entries, setEntries, weekId, selectedRole, setSelectedRole, weeks, kpis }) {
+function KpiTracking({ roles, entries, setEntries, weekId, selectedRole, setSelectedRole, weeks, kpis, timeHorizon = "week", setTimeHorizon }) {
   const [editing, setEditing] = useState(null);
   const week = weeks.find((w) => w.id === weekId);
-  const isLocked = week.status === "locked";
-  const rows = getEntriesForWeek(entries, weekId, kpis).filter(({ def }) => selectedRole === "all" || def.roleId === selectedRole);
+  const isWeekLocked = week?.status === "locked";
+  const isLocked = isWeekLocked || timeHorizon !== "week";
+  
+  const rows = kpis
+    .map((def) => ({ def, entry: entries.find((e) => e.kpiId === def.id) }))
+    .filter(({ def }) => selectedRole === "all" || def.roleId === selectedRole);
 
   return (
     <PageShell
-      eyebrow={isLocked ? "Historical week · view only" : "Current weekly input"}
-      title={isLocked ? "This week is locked as historical record." : "Input the real components behind each KPI."}
-      description={isLocked ? "Past weeks can be reviewed but not freely changed. Use correction notes in the final product if historical data needs adjustment." : "Percentage KPIs are calculated from their numerator and denominator so the team can trust the context behind the final rate."}
+      eyebrow={isLocked ? "Historical / aggregated view · view only" : "Current weekly input"}
+      title={timeHorizon !== "week" ? `Viewing aggregated ${timeHorizon} metrics.` : isLocked ? "This week is locked as historical record." : "Input the real components behind each KPI."}
+      description={timeHorizon !== "week" ? `Metric values are mathematically aggregated across the active ${timeHorizon} range.` : isLocked ? "Past weeks can be reviewed but not freely changed. Use correction notes in the final product if historical data needs adjustment." : "Percentage KPIs are calculated from their numerator and denominator so the team can trust the context behind the final rate."}
     >
+      {timeHorizon !== "week" && (
+        <div className="mb-6 rounded-[24px] bg-[#f5f5f7] border border-black/5 p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 text-sm text-[#6e6e73] shadow-sm">
+          <div className="flex items-center gap-2.5">
+            <Lock size={15} className="text-[#a1a1a6]" />
+            <span><strong>Aggregated View:</strong> You are currently viewing aggregated <strong>{timeHorizon}</strong> metrics. Editing and inputs are only permitted in <strong>Weekly</strong> view.</span>
+          </div>
+          {setTimeHorizon && (
+            <button onClick={() => setTimeHorizon("week")} className="text-black font-semibold hover:underline text-left md:text-right">
+              Switch to Weekly View →
+            </button>
+          )}
+        </div>
+      )}
       <div className="mb-5 flex flex-col justify-between gap-3 rounded-[30px] bg-white p-4 shadow-sm ring-1 ring-black/5 md:flex-row md:items-center">
         <div className="flex items-center gap-3 px-2">
           {isLocked ? <Lock size={18} className="text-[#6e6e73]" /> : <Users size={18} className="text-[#6e6e73]" />}
@@ -1735,6 +1923,16 @@ export default function B2CKPIDashboardPrototype() {
   const [dbError, setDbError] = useState(null);
   const [actionError, setActionError] = useState(null);
 
+  const [timeHorizon, setTimeHorizon] = useState("week"); // "week" | "month" | "quarter" | "custom"
+  const [selectedMonth, setSelectedMonth] = useState("June 2026");
+  const [selectedQuarter, setSelectedQuarter] = useState("Q2 2026");
+  const [customRange, setCustomRange] = useState({ start: "2026-06-01", end: "2026-06-30" });
+
+  const activeEntries = useMemo(() => {
+    const aggregated = getEntriesForRange(entries, kpis, weeks, timeHorizon, timeHorizon === "week" ? weekId : timeHorizon === "month" ? selectedMonth : selectedQuarter, customRange);
+    return aggregated.map(a => a.entry).filter(Boolean);
+  }, [entries, kpis, weeks, timeHorizon, weekId, selectedMonth, selectedQuarter, customRange]);
+
   const fetchData = async () => {
     setLoading(true);
     setDbError(null);
@@ -1906,7 +2104,21 @@ export default function B2CKPIDashboardPrototype() {
 
   return (
     <div className="min-h-screen bg-[#f5f5f7] font-sans text-[#1d1d1f]">
-      <Header active={active} setActive={setActive} weekId={weekId} setWeekId={setWeekId} weeks={weeks} />
+      <Header 
+        active={active} 
+        setActive={setActive} 
+        weekId={weekId} 
+        setWeekId={setWeekId} 
+        weeks={weeks}
+        timeHorizon={timeHorizon}
+        setTimeHorizon={setTimeHorizon}
+        selectedMonth={selectedMonth}
+        setSelectedMonth={setSelectedMonth}
+        selectedQuarter={selectedQuarter}
+        setSelectedQuarter={setSelectedQuarter}
+        customRange={customRange}
+        setCustomRange={setCustomRange}
+      />
       {actionError && (
         <div className="mx-auto mt-4 max-w-7xl px-6">
           <div className="rounded-[20px] bg-rose-50 text-rose-800 p-4 text-sm leading-6 ring-1 ring-rose-200 flex items-center justify-between shadow-sm">
@@ -1919,8 +2131,8 @@ export default function B2CKPIDashboardPrototype() {
         </div>
       )}
       {active === "home" && <Home setActive={setActive} />}
-      {active === "dashboard" && <Dashboard roles={roles} entries={entries} weekId={weekId} setActive={setActive} setSelectedRole={setSelectedRole} weeks={weeks} kpis={kpis} />}
-      {active === "tracking" && <KpiTracking roles={roles} entries={entries} setEntries={setEntries} weekId={weekId} selectedRole={selectedRole} setSelectedRole={setSelectedRole} weeks={weeks} kpis={kpis} />}
+      {active === "dashboard" && <Dashboard roles={roles} entries={activeEntries} weekId={weekId} setActive={setActive} setSelectedRole={setSelectedRole} weeks={weeks} kpis={kpis} />}
+      {active === "tracking" && <KpiTracking roles={roles} entries={activeEntries} setEntries={setEntries} weekId={weekId} selectedRole={selectedRole} setSelectedRole={setSelectedRole} weeks={weeks} kpis={kpis} timeHorizon={timeHorizon} setTimeHorizon={setTimeHorizon} />}
       {active === "history" && <KpiHistory roles={roles} entries={entries} selectedRole={selectedRole} setSelectedRole={setSelectedRole} weeks={weeks} kpis={kpis} />}
       {active === "weekly" && <WeeklyReview roles={roles} entries={entries} weekId={weekId} setWeekStatus={setWeekStatus} weeks={weeks} kpis={kpis} weeklyReviews={weeklyReviews} setWeeklyReviews={setWeeklyReviews} />}
       {active === "campaign" && <PlannedModulePage title="Campaign Library" subtitle="A future module for campaign archive, A/B testing history, creative learning, and post-campaign evaluation." features={["Campaign archive", "A/B test tracker", "Result and learning log"]} setActive={setActive} />}
