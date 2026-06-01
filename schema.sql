@@ -292,10 +292,19 @@ INSERT INTO roles (id, name, owner, mandate) VALUES
 
 -- 2. Weeks Seed
 INSERT INTO weeks (id, label, status, quarter_week) VALUES
-('w1', '3–7 June 2026', 'locked', 'Week 1 of 13'),
-('w2', '10–14 June 2026', 'locked', 'Week 2 of 13'),
-('w3', '17–21 June 2026', 'current', 'Week 3 of 13'),
-('w4', '24–28 June 2026', 'planned', 'Week 4 of 13');
+('apr-w1', '30 Mar – 5 Apr 2026', 'current', 'April W1'),
+('apr-w2', '6–12 Apr 2026', 'current', 'April W2'),
+('apr-w3', '13–19 Apr 2026', 'current', 'April W3'),
+('apr-w4', '20–26 Apr 2026', 'current', 'April W4'),
+('may-w1', '27 Apr – 3 May 2026', 'current', 'May W1'),
+('may-w2', '4–10 May 2026', 'current', 'May W2'),
+('may-w3', '11–17 May 2026', 'current', 'May W3'),
+('may-w4', '18–24 May 2026', 'current', 'May W4'),
+('may-w5', '25–31 May 2026', 'current', 'May W5'),
+('jun-w1', '1–7 Jun 2026', 'current', 'June W1'),
+('jun-w2', '8–14 Jun 2026', 'planned', 'June W2'),
+('jun-w3', '15–21 Jun 2026', 'planned', 'June W3'),
+('jun-w4', '22–28 Jun 2026', 'planned', 'June W4');
 
 -- 3. KPI Definitions Seed
 INSERT INTO kpi_definitions (id, role_id, name, description, input_type, display_type, target_value, target_status, unit, numerator_label, denominator_label, checklist_items) VALUES
@@ -323,69 +332,69 @@ ALTER TABLE weekly_reviews DISABLE TRIGGER USER;
 
 -- Week 1 locked
 INSERT INTO kpi_entries (week_id, kpi_id, actual_value, actual_status, numerator_value, denominator_value, checklist_values, notes, blocker, next_action, updated_by) VALUES
-('w1', 'kpi-1', 21000000, NULL, NULL, NULL, NULL, 'Academy carried the week.', 'Low conversion', 'Retarget warm leads.', 'Dwi'),
-('w1', 'kpi-2', 3800000, NULL, NULL, NULL, NULL, 'Assisted flow still unclear.', 'Waiting for decision', 'Clarify offer ladder.', 'Dwi'),
-('w1', 'kpi-3', NULL, NULL, 29, 44, NULL, 'Follow-up slipped near end of week.', 'Overcapacity', 'Batch follow-up twice weekly.', 'Dwi'),
-('w1', 'kpi-4', NULL, 'Needs Attention', NULL, NULL, NULL, 'Meeting happened, decision notes incomplete.', 'Timeline too tight', 'Use review page live.', 'Dwi'),
-('w1', 'kpi-5', 8, NULL, NULL, NULL, NULL, 'Lead quality mixed.', 'Low inquiry quality', 'Improve CTA qualification.', 'Wina'),
-('w1', 'kpi-6', NULL, NULL, 36, 42, NULL, 'Mostly under 24h.', 'No blocker', 'Maintain response window.', 'Wina'),
-('w1', 'kpi-7', NULL, NULL, 24, 42, NULL, 'Some free class leads stale.', 'Overcapacity', 'Hot lead priority.', 'Wina'),
-('w1', 'kpi-8', 1, NULL, NULL, NULL, NULL, 'Only one WA activation.', 'Waiting for asset/material', 'Prepare weekly WA kit.', 'Wina'),
-('w1', 'kpi-9', NULL, 'On Track', NULL, NULL, NULL, 'Program ready.', 'No blocker', 'Maintain checklist.', 'Fariz'),
-('w1', 'kpi-10', NULL, 'On Track', NULL, NULL, NULL, 'Delivery stable.', 'No blocker', 'Maintain.', 'Fariz'),
-('w1', 'kpi-11', NULL, NULL, 32, 42, NULL, 'Attendance acceptable.', 'No blocker', 'Add reminder H-1.', 'Fariz'),
-('w1', 'kpi-12', NULL, NULL, NULL, NULL, '[true, true, false, false]', 'Feedback collected but not converted.', 'Waiting for decision', 'Assign owner.', 'Fariz'),
-('w1', 'kpi-13', NULL, NULL, 7, 9, NULL, 'Late brief affected output.', 'Unclear brief', 'Lock brief H-5.', 'Annisa'),
-('w1', 'kpi-14', NULL, 'Needs Attention', NULL, NULL, NULL, 'P0 direction shifted.', 'Waiting for decision', 'Freeze direction before production.', 'Annisa'),
-('w1', 'kpi-15', 7, NULL, NULL, NULL, NULL, 'One asset postponed.', 'Waiting for asset/material', 'Prioritize P0 queue.', 'Annisa'),
-('w1', 'kpi-16', 3, NULL, NULL, NULL, NULL, 'Too many back-and-forth revisions.', 'Unclear brief', 'Improve first brief.', 'Annisa');
+('jun-w1', 'kpi-1', 21000000, NULL, NULL, NULL, NULL, 'Academy carried the week.', 'Low conversion', 'Retarget warm leads.', 'Dwi'),
+('jun-w1', 'kpi-2', 3800000, NULL, NULL, NULL, NULL, 'Assisted flow still unclear.', 'Waiting for decision', 'Clarify offer ladder.', 'Dwi'),
+('jun-w1', 'kpi-3', NULL, NULL, 29, 44, NULL, 'Follow-up slipped near end of week.', 'Overcapacity', 'Batch follow-up twice weekly.', 'Dwi'),
+('jun-w1', 'kpi-4', NULL, 'Needs Attention', NULL, NULL, NULL, 'Meeting happened, decision notes incomplete.', 'Timeline too tight', 'Use review page live.', 'Dwi'),
+('jun-w1', 'kpi-5', 8, NULL, NULL, NULL, NULL, 'Lead quality mixed.', 'Low inquiry quality', 'Improve CTA qualification.', 'Wina'),
+('jun-w1', 'kpi-6', NULL, NULL, 36, 42, NULL, 'Mostly under 24h.', 'No blocker', 'Maintain response window.', 'Wina'),
+('jun-w1', 'kpi-7', NULL, NULL, 24, 42, NULL, 'Some free class leads stale.', 'Overcapacity', 'Hot lead priority.', 'Wina'),
+('jun-w1', 'kpi-8', 1, NULL, NULL, NULL, NULL, 'Only one WA activation.', 'Waiting for asset/material', 'Prepare weekly WA kit.', 'Wina'),
+('jun-w1', 'kpi-9', NULL, 'On Track', NULL, NULL, NULL, 'Program ready.', 'No blocker', 'Maintain checklist.', 'Fariz'),
+('jun-w1', 'kpi-10', NULL, 'On Track', NULL, NULL, NULL, 'Delivery stable.', 'No blocker', 'Maintain.', 'Fariz'),
+('jun-w1', 'kpi-11', NULL, NULL, 32, 42, NULL, 'Attendance acceptable.', 'No blocker', 'Add reminder H-1.', 'Fariz'),
+('jun-w1', 'kpi-12', NULL, NULL, NULL, NULL, '[true, true, false, false]', 'Feedback collected but not converted.', 'Waiting for decision', 'Assign owner.', 'Fariz'),
+('jun-w1', 'kpi-13', NULL, NULL, 7, 9, NULL, 'Late brief affected output.', 'Unclear brief', 'Lock brief H-5.', 'Annisa'),
+('jun-w1', 'kpi-14', NULL, 'Needs Attention', NULL, NULL, NULL, 'P0 direction shifted.', 'Waiting for decision', 'Freeze direction before production.', 'Annisa'),
+('jun-w1', 'kpi-15', 7, NULL, NULL, NULL, NULL, 'One asset postponed.', 'Waiting for asset/material', 'Prioritize P0 queue.', 'Annisa'),
+('jun-w1', 'kpi-16', 3, NULL, NULL, NULL, NULL, 'Too many back-and-forth revisions.', 'Unclear brief', 'Improve first brief.', 'Annisa');
 
 -- Week 2 locked
 INSERT INTO kpi_entries (week_id, kpi_id, actual_value, actual_status, numerator_value, denominator_value, checklist_values, notes, blocker, next_action, updated_by) VALUES
-('w2', 'kpi-1', 22950000, NULL, NULL, NULL, NULL, 'Revenue improved from last week.', 'Low conversion', 'Push Academy closing window.', 'Dwi'),
-('w2', 'kpi-2', 5200000, NULL, NULL, NULL, NULL, 'Some Assisted interest converted.', 'Low conversion', 'Use proof asset in follow-up.', 'Dwi'),
-('w2', 'kpi-3', NULL, NULL, 38, 50, NULL, 'Better completion but still below target.', 'Overcapacity', 'Reduce low-intent follow-up.', 'Dwi'),
-('w2', 'kpi-4', NULL, 'On Track', NULL, NULL, NULL, 'Weekly review completed.', 'No blocker', 'Maintain review ritual.', 'Dwi'),
-('w2', 'kpi-5', 10, NULL, NULL, NULL, NULL, 'Lead intake improved.', 'Low inquiry quality', 'Add qualifying question.', 'Wina'),
-('w2', 'kpi-6', NULL, NULL, 41, 45, NULL, 'Response time healthy.', 'No blocker', 'Maintain.', 'Wina'),
-('w2', 'kpi-7', NULL, NULL, 34, 48, NULL, 'Follow-up backlog reduced.', 'Overcapacity', 'Daily 30-min follow-up block.', 'Wina'),
-('w2', 'kpi-8', 2, NULL, NULL, NULL, NULL, 'Two community touches done.', 'No blocker', 'Test testimonial angle.', 'Wina'),
-('w2', 'kpi-9', NULL, 'On Track', NULL, NULL, NULL, 'Prep stable.', 'No blocker', 'Mentor brief.', 'Fariz'),
-('w2', 'kpi-10', NULL, 'On Track', NULL, NULL, NULL, 'Class delivered well.', 'No blocker', 'Maintain.', 'Fariz'),
-('w2', 'kpi-11', NULL, NULL, 34, 40, NULL, 'Attendance improved.', 'No blocker', 'Keep reminder flow.', 'Fariz'),
-('w2', 'kpi-12', NULL, NULL, NULL, NULL, '[true, true, true, false]', 'Improvement action defined, owner not assigned yet.', 'Waiting for decision', 'Assign improvement owner.', 'Fariz'),
-('w2', 'kpi-13', NULL, NULL, 8, 9, NULL, 'Almost on target.', 'Unclear brief', 'Brief checklist.', 'Annisa'),
-('w2', 'kpi-14', NULL, 'Needs Attention', NULL, NULL, NULL, 'P0 campaign asset still needs earlier lock.', 'Waiting for decision', 'Confirm direction earlier.', 'Annisa'),
-('w2', 'kpi-15', 8, NULL, NULL, NULL, NULL, 'Production met target.', 'No blocker', 'Maintain.', 'Annisa'),
-('w2', 'kpi-16', 2, NULL, NULL, NULL, NULL, 'Revision cycle healthy.', 'No blocker', 'Maintain.', 'Annisa');
+('jun-w2', 'kpi-1', 22950000, NULL, NULL, NULL, NULL, 'Revenue improved from last week.', 'Low conversion', 'Push Academy closing window.', 'Dwi'),
+('jun-w2', 'kpi-2', 5200000, NULL, NULL, NULL, NULL, 'Some Assisted interest converted.', 'Low conversion', 'Use proof asset in follow-up.', 'Dwi'),
+('jun-w2', 'kpi-3', NULL, NULL, 38, 50, NULL, 'Better completion but still below target.', 'Overcapacity', 'Reduce low-intent follow-up.', 'Dwi'),
+('jun-w2', 'kpi-4', NULL, 'On Track', NULL, NULL, NULL, 'Weekly review completed.', 'No blocker', 'Maintain review ritual.', 'Dwi'),
+('jun-w2', 'kpi-5', 10, NULL, NULL, NULL, NULL, 'Lead intake improved.', 'Low inquiry quality', 'Add qualifying question.', 'Wina'),
+('jun-w2', 'kpi-6', NULL, NULL, 41, 45, NULL, 'Response time healthy.', 'No blocker', 'Maintain.', 'Wina'),
+('jun-w2', 'kpi-7', NULL, NULL, 34, 48, NULL, 'Follow-up backlog reduced.', 'Overcapacity', 'Daily 30-min follow-up block.', 'Wina'),
+('jun-w2', 'kpi-8', 2, NULL, NULL, NULL, NULL, 'Two community touches done.', 'No blocker', 'Test testimonial angle.', 'Wina'),
+('jun-w2', 'kpi-9', NULL, 'On Track', NULL, NULL, NULL, 'Prep stable.', 'No blocker', 'Mentor brief.', 'Fariz'),
+('jun-w2', 'kpi-10', NULL, 'On Track', NULL, NULL, NULL, 'Class delivered well.', 'No blocker', 'Maintain.', 'Fariz'),
+('jun-w2', 'kpi-11', NULL, NULL, 34, 40, NULL, 'Attendance improved.', 'No blocker', 'Keep reminder flow.', 'Fariz'),
+('jun-w2', 'kpi-12', NULL, NULL, NULL, NULL, '[true, true, true, false]', 'Improvement action defined, owner not assigned yet.', 'Waiting for decision', 'Assign improvement owner.', 'Fariz'),
+('jun-w2', 'kpi-13', NULL, NULL, 8, 9, NULL, 'Almost on target.', 'Unclear brief', 'Brief checklist.', 'Annisa'),
+('jun-w2', 'kpi-14', NULL, 'Needs Attention', NULL, NULL, NULL, 'P0 campaign asset still needs earlier lock.', 'Waiting for decision', 'Confirm direction earlier.', 'Annisa'),
+('jun-w2', 'kpi-15', 8, NULL, NULL, NULL, NULL, 'Production met target.', 'No blocker', 'Maintain.', 'Annisa'),
+('jun-w2', 'kpi-16', 2, NULL, NULL, NULL, NULL, 'Revision cycle healthy.', 'No blocker', 'Maintain.', 'Annisa');
 
 -- (All historical inputs are loaded consecutively)
 
 -- Week 3 current (active, editable)
 INSERT INTO kpi_entries (week_id, kpi_id, actual_value, actual_status, numerator_value, denominator_value, checklist_values, notes, blocker, next_action, updated_by) VALUES
-('w3', 'kpi-1', 18750000, NULL, NULL, NULL, NULL, 'Academy moving, Personal License still below target.', 'Low conversion', 'Prioritize Personal License Business retargeting and assisted follow-up.', 'Dwi'),
-('w3', 'kpi-2', 4200000, NULL, NULL, NULL, NULL, 'Assisted interest exists, but closing path is still not firm.', 'Waiting for decision', 'Lock Assisted offer flow and clarify follow-up ownership.', 'Dwi'),
-('w3', 'kpi-3', NULL, NULL, 38, 50, NULL, 'Several leads from WA were followed up late.', 'Overcapacity', 'Focus only on hot leads and define follow-up batch time.', 'Dwi'),
-('w3', 'kpi-4', NULL, 'Needs Attention', NULL, NULL, NULL, 'Weekly meeting happened, but decision log was incomplete.', 'Timeline too tight', 'Use Weekly Review page during meeting, not after meeting.', 'Dwi'),
-('w3', 'kpi-5', 9, NULL, NULL, NULL, NULL, 'Most leads came from WA Community and Academy inquiries.', 'Low inquiry quality', 'Tighten CTA and ask one qualification question before routing.', 'Wina'),
-('w3', 'kpi-6', NULL, NULL, 40, 43, NULL, 'Most inquiries were responded to within 24 hours.', 'No blocker', 'Maintain response block twice per day.', 'Wina'),
-('w3', 'kpi-7', NULL, NULL, 31, 49, NULL, 'Some leads became stale after free class.', 'Overcapacity', 'Prioritize hot leads first and close stale leads with final CTA.', 'Wina'),
-('w3', 'kpi-8', 2, NULL, NULL, NULL, NULL, 'One education post and one offer reminder sent.', 'No blocker', 'Add testimonial format next week.', 'Wina'),
-('w3', 'kpi-9', NULL, 'On Track', NULL, NULL, NULL, 'Location Analytics prep is stable.', 'No blocker', 'Confirm mentor brief for next session.', 'Fariz'),
-('w3', 'kpi-10', NULL, 'On Track', NULL, NULL, NULL, 'No delivery issue this week.', 'No blocker', 'Maintain class checklist.', 'Fariz'),
-('w3', 'kpi-11', NULL, NULL, 34, 41, NULL, 'Attendance is healthy, but some participants requested clearer hands-on steps.', 'No blocker', 'Improve hands-on instruction clarity.', 'Fariz'),
-('w3', 'kpi-12', NULL, NULL, NULL, NULL, '[true, true, false, false]', 'Feedback collected but not yet converted into implementation action.', 'Waiting for decision', 'Pick top 3 issues and assign improvement owner.', 'Fariz'),
-('w3', 'kpi-13', NULL, NULL, 8, 9, NULL, 'One campaign asset was delayed due to late brief.', 'Unclear brief', 'Require H-5 locked brief for P0 assets.', 'Annisa'),
-('w3', 'kpi-14', NULL, 'Needs Attention', NULL, NULL, NULL, 'Some visual direction was still changing near launch.', 'Waiting for decision', 'Confirm campaign direction before production starts.', 'Annisa'),
-('w3', 'kpi-15', 8, NULL, NULL, NULL, NULL, 'Production volume met the weekly target.', 'No blocker', 'Keep production queue focused on P0 products.', 'Annisa'),
-('w3', 'kpi-16', 2, NULL, NULL, NULL, NULL, 'Most assets completed within two revision cycles.', 'No blocker', 'Maintain clear first brief standard.', 'Annisa');
+('jun-w3', 'kpi-1', 18750000, NULL, NULL, NULL, NULL, 'Academy moving, Personal License still below target.', 'Low conversion', 'Prioritize Personal License Business retargeting and assisted follow-up.', 'Dwi'),
+('jun-w3', 'kpi-2', 4200000, NULL, NULL, NULL, NULL, 'Assisted interest exists, but closing path is still not firm.', 'Waiting for decision', 'Lock Assisted offer flow and clarify follow-up ownership.', 'Dwi'),
+('jun-w3', 'kpi-3', NULL, NULL, 38, 50, NULL, 'Several leads from WA were followed up late.', 'Overcapacity', 'Focus only on hot leads and define follow-up batch time.', 'Dwi'),
+('jun-w3', 'kpi-4', NULL, 'Needs Attention', NULL, NULL, NULL, 'Weekly meeting happened, but decision log was incomplete.', 'Timeline too tight', 'Use Weekly Review page during meeting, not after meeting.', 'Dwi'),
+('jun-w3', 'kpi-5', 9, NULL, NULL, NULL, NULL, 'Most leads came from WA Community and Academy inquiries.', 'Low inquiry quality', 'Tighten CTA and ask one qualification question before routing.', 'Wina'),
+('jun-w3', 'kpi-6', NULL, NULL, 40, 43, NULL, 'Most inquiries were responded to within 24 hours.', 'No blocker', 'Maintain response block twice per day.', 'Wina'),
+('jun-w3', 'kpi-7', NULL, NULL, 31, 49, NULL, 'Some leads became stale after free class.', 'Overcapacity', 'Prioritize hot leads first and close stale leads with final CTA.', 'Wina'),
+('jun-w3', 'kpi-8', 2, NULL, NULL, NULL, NULL, 'One education post and one offer reminder sent.', 'No blocker', 'Add testimonial format next week.', 'Wina'),
+('jun-w3', 'kpi-9', NULL, 'On Track', NULL, NULL, NULL, 'Location Analytics prep is stable.', 'No blocker', 'Confirm mentor brief for next session.', 'Fariz'),
+('jun-w3', 'kpi-10', NULL, 'On Track', NULL, NULL, NULL, 'No delivery issue this week.', 'No blocker', 'Maintain class checklist.', 'Fariz'),
+('jun-w3', 'kpi-11', NULL, NULL, 34, 41, NULL, 'Attendance is healthy, but some participants requested clearer hands-on steps.', 'No blocker', 'Improve hands-on instruction clarity.', 'Fariz'),
+('jun-w3', 'kpi-12', NULL, NULL, NULL, NULL, '[true, true, false, false]', 'Feedback collected but not yet converted into implementation action.', 'Waiting for decision', 'Pick top 3 issues and assign improvement owner.', 'Fariz'),
+('jun-w3', 'kpi-13', NULL, NULL, 8, 9, NULL, 'One campaign asset was delayed due to late brief.', 'Unclear brief', 'Require H-5 locked brief for P0 assets.', 'Annisa'),
+('jun-w3', 'kpi-14', NULL, 'Needs Attention', NULL, NULL, NULL, 'Some visual direction was still changing near launch.', 'Waiting for decision', 'Confirm campaign direction before production starts.', 'Annisa'),
+('jun-w3', 'kpi-15', 8, NULL, NULL, NULL, NULL, 'Production volume met the weekly target.', 'No blocker', 'Keep production queue focused on P0 products.', 'Annisa'),
+('jun-w3', 'kpi-16', 2, NULL, NULL, NULL, NULL, 'Most assets completed within two revision cycles.', 'No blocker', 'Maintain clear first brief standard.', 'Annisa');
 
 
 -- 5. Weekly Reviews Seeds
 INSERT INTO weekly_reviews (week_id, revenue_total, leads_in, follow_up_rate, conversion_notes, decisions_made, priorities_next_week) VALUES
-('w1', 21000000, 44, '66%', 'Academy carried the week. Assisted revenue still slow.', 'Clarify Assisted offer hierarchy.', 'Retarget warm leads.'),
-('w2', 22950000, 50, '76%', 'Good progress on Academy conversions.', 'Lock Academy pricing tiers.', 'Push closing window on next cohort.'),
-('w3', 18750000, 50, '76%', 'Revenue slightly flat this week.', 'Confirm campaign visual asset guidelines H-5.', 'Prioritize warm business inquiries first.');
+('jun-w1', 21000000, 44, '66%', 'Academy carried the week. Assisted revenue still slow.', 'Clarify Assisted offer hierarchy.', 'Retarget warm leads.'),
+('jun-w2', 22950000, 50, '76%', 'Good progress on Academy conversions.', 'Lock Academy pricing tiers.', 'Push closing window on next cohort.'),
+('jun-w3', 18750000, 50, '76%', 'Revenue slightly flat this week.', 'Confirm campaign visual asset guidelines H-5.', 'Prioritize warm business inquiries first.');
 
 -- Re-enable all triggers now that seed data loading has successfully completed
 ALTER TABLE kpi_entries ENABLE TRIGGER USER;

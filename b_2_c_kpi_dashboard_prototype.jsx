@@ -335,10 +335,19 @@ function makeWeekEntries(weekId, values) {
 
 function getWeekRange(week) {
   const seeded = {
-    w1: { start: new Date("2026-06-03"), end: new Date("2026-06-07"), month: "June 2026", quarter: "Q2 2026" },
-    w2: { start: new Date("2026-06-10"), end: new Date("2026-06-14"), month: "June 2026", quarter: "Q2 2026" },
-    w3: { start: new Date("2026-06-17"), end: new Date("2026-06-21"), month: "June 2026", quarter: "Q2 2026" },
-    w4: { start: new Date("2026-06-24"), end: new Date("2026-06-28"), month: "June 2026", quarter: "Q2 2026" },
+    'apr-w1': { start: new Date("2026-03-30"), end: new Date("2026-04-05"), month: "April 2026", quarter: "Q2 2026" },
+    'apr-w2': { start: new Date("2026-04-06"), end: new Date("2026-04-12"), month: "April 2026", quarter: "Q2 2026" },
+    'apr-w3': { start: new Date("2026-04-13"), end: new Date("2026-04-19"), month: "April 2026", quarter: "Q2 2026" },
+    'apr-w4': { start: new Date("2026-04-20"), end: new Date("2026-04-26"), month: "April 2026", quarter: "Q2 2026" },
+    'may-w1': { start: new Date("2026-04-27"), end: new Date("2026-05-03"), month: "May 2026", quarter: "Q2 2026" },
+    'may-w2': { start: new Date("2026-05-04"), end: new Date("2026-05-10"), month: "May 2026", quarter: "Q2 2026" },
+    'may-w3': { start: new Date("2026-05-11"), end: new Date("2026-05-17"), month: "May 2026", quarter: "Q2 2026" },
+    'may-w4': { start: new Date("2026-05-18"), end: new Date("2026-05-24"), month: "May 2026", quarter: "Q2 2026" },
+    'may-w5': { start: new Date("2026-05-25"), end: new Date("2026-05-31"), month: "May 2026", quarter: "Q2 2026" },
+    'jun-w1': { start: new Date("2026-06-01"), end: new Date("2026-06-07"), month: "June 2026", quarter: "Q2 2026" },
+    'jun-w2': { start: new Date("2026-06-08"), end: new Date("2026-06-14"), month: "June 2026", quarter: "Q2 2026" },
+    'jun-w3': { start: new Date("2026-06-15"), end: new Date("2026-06-21"), month: "June 2026", quarter: "Q2 2026" },
+    'jun-w4': { start: new Date("2026-06-22"), end: new Date("2026-06-28"), month: "June 2026", quarter: "Q2 2026" },
   };
   if (seeded[week.id]) return seeded[week.id];
   return { start: new Date(week.created_at || Date.now()), end: new Date(week.created_at || Date.now()), month: "June 2026", quarter: "Q2 2026" };
@@ -507,22 +516,7 @@ function getActivePrimary(active) {
   return active;
 }
 
-function Header({ 
-  active, 
-  setActive, 
-  weekId, 
-  setWeekId, 
-  weeks,
-  timeHorizon,
-  setTimeHorizon,
-  selectedMonth,
-  setSelectedMonth,
-  selectedQuarter,
-  setSelectedQuarter,
-  customRange,
-  setCustomRange
-}) {
-  const week = weeks.find((w) => w.id === weekId);
+function Header({ active, setActive }) {
   const activePrimary = getActivePrimary(active);
   const showKpiSubnav = activePrimary === "kpi";
 
@@ -530,9 +524,6 @@ function Header({
     if (id === "kpi") return setActive("dashboard");
     return setActive(id);
   }
-
-  const monthOptions = ["June 2026"];
-  const quarterOptions = ["Q2 2026"];
 
   return (
     <div className="sticky top-0 z-30 border-b border-black/5 bg-[#f5f5f7]/80 backdrop-blur-xl">
@@ -547,27 +538,6 @@ function Header({
               <div className="text-xs text-[#6e6e73]">Growth Operating System · MVP</div>
             </div>
           </button>
-          
-          <div className="md:hidden flex items-center gap-1 text-xs text-[#6e6e73]">
-            {timeHorizon === "week" && (week?.status === "locked" ? <Lock size={12} /> : <LockOpen size={12} />)}
-            <span className="capitalize">{timeHorizon}</span>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-center">
-          <div className="flex rounded-full bg-white/90 p-1 shadow-sm ring-1 ring-black/5">
-            {["week", "month", "quarter", "custom"].map((h) => (
-              <button
-                key={h}
-                onClick={() => setTimeHorizon(h)}
-                className={`rounded-full px-3 py-1.5 text-xs font-medium capitalize transition ${
-                  timeHorizon === h ? "bg-black text-white shadow-sm" : "text-[#6e6e73] hover:text-[#1d1d1f]"
-                }`}
-              >
-                {h}
-              </button>
-            ))}
-          </div>
         </div>
 
         <div className="flex flex-wrap items-center justify-end gap-3">
@@ -589,62 +559,6 @@ function Header({
               );
             })}
           </nav>
-
-          <div className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-medium shadow-sm ring-1 ring-black/5 w-full md:w-auto justify-center">
-            {timeHorizon === "week" && (
-              <>
-                {week?.status === "locked" ? <Lock size={14} className="text-[#6e6e73]" /> : <LockOpen size={14} className="text-[#6e6e73]" />}
-                <select value={weekId} onChange={(e) => setWeekId(e.target.value)} className="bg-transparent text-[#1d1d1f] outline-none max-w-[150px] font-semibold cursor-pointer">
-                  {weeks.map((w) => (
-                    <option key={w.id} value={w.id}>{w.label}</option>
-                  ))}
-                </select>
-                <ChevronDown size={12} className="text-[#6e6e73]" />
-              </>
-            )}
-
-            {timeHorizon === "month" && (
-              <>
-                <CalendarDays size={14} className="text-[#6e6e73]" />
-                <select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} className="bg-transparent text-[#1d1d1f] outline-none font-semibold cursor-pointer">
-                  {monthOptions.map((m) => (
-                    <option key={m} value={m}>{m}</option>
-                  ))}
-                </select>
-                <ChevronDown size={12} className="text-[#6e6e73]" />
-              </>
-            )}
-
-            {timeHorizon === "quarter" && (
-              <>
-                <Archive size={14} className="text-[#6e6e73]" />
-                <select value={selectedQuarter} onChange={(e) => setSelectedQuarter(e.target.value)} className="bg-transparent text-[#1d1d1f] outline-none font-semibold cursor-pointer">
-                  {quarterOptions.map((q) => (
-                    <option key={q} value={q}>{q}</option>
-                  ))}
-                </select>
-                <ChevronDown size={12} className="text-[#6e6e73]" />
-              </>
-            )}
-
-            {timeHorizon === "custom" && (
-              <div className="flex items-center gap-1.5 font-semibold">
-                <input 
-                  type="date" 
-                  value={customRange.start} 
-                  onChange={(e) => setCustomRange({ ...customRange, start: e.target.value })} 
-                  className="bg-transparent text-[#1d1d1f] outline-none border-0 p-0 text-xs w-[100px] cursor-pointer"
-                />
-                <span className="text-[#a1a1a6]">to</span>
-                <input 
-                  type="date" 
-                  value={customRange.end} 
-                  onChange={(e) => setCustomRange({ ...customRange, end: e.target.value })} 
-                  className="bg-transparent text-[#1d1d1f] outline-none border-0 p-0 text-xs w-[100px] cursor-pointer"
-                />
-              </div>
-            )}
-          </div>
         </div>
       </div>
 
@@ -688,6 +602,96 @@ function Header({
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function FilterBar({
+  weekId, setWeekId, weeks,
+  timeHorizon, setTimeHorizon,
+  selectedMonth, setSelectedMonth,
+  selectedQuarter, setSelectedQuarter,
+  customRange, setCustomRange
+}) {
+  const week = weeks.find((w) => w.id === weekId);
+  const monthOptions = ["April 2026", "May 2026", "June 2026"];
+  const quarterOptions = ["Q2 2026"];
+
+  return (
+    <div className="border-b border-black/[0.03] bg-white">
+      <div className="mx-auto max-w-7xl px-6 py-3 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        
+        <div className="flex items-center gap-3">
+          <div className="text-xs font-bold uppercase tracking-widest text-[#a1a1a6] hidden sm:block">TIME HORIZON</div>
+          <div className="flex rounded-full bg-[#f5f5f7] p-1 ring-1 ring-black/5">
+            {["week", "month", "quarter", "custom"].map((h) => (
+              <button
+                key={h}
+                onClick={() => setTimeHorizon(h)}
+                className={`rounded-full px-3 py-1.5 text-xs font-medium capitalize transition ${
+                  timeHorizon === h ? "bg-white text-black shadow-sm ring-1 ring-black/5" : "text-[#6e6e73] hover:text-[#1d1d1f]"
+                }`}
+              >
+                {h}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 rounded-full bg-[#f5f5f7] px-4 py-2 text-xs font-medium ring-1 ring-black/5">
+          {timeHorizon === "week" && (
+            <>
+              {week?.status === "locked" ? <Lock size={14} className="text-[#6e6e73]" /> : <LockOpen size={14} className="text-[#6e6e73]" />}
+              <select value={weekId} onChange={(e) => setWeekId(e.target.value)} className="bg-transparent text-[#1d1d1f] outline-none max-w-[200px] font-semibold cursor-pointer">
+                {weeks.map((w) => (
+                  <option key={w.id} value={w.id}>{w.label}</option>
+                ))}
+              </select>
+              <ChevronDown size={12} className="text-[#6e6e73]" />
+            </>
+          )}
+          {timeHorizon === "month" && (
+            <>
+              <CalendarDays size={14} className="text-[#6e6e73]" />
+              <select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} className="bg-transparent text-[#1d1d1f] outline-none font-semibold cursor-pointer">
+                {monthOptions.map((m) => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
+              </select>
+              <ChevronDown size={12} className="text-[#6e6e73]" />
+            </>
+          )}
+          {timeHorizon === "quarter" && (
+            <>
+              <Archive size={14} className="text-[#6e6e73]" />
+              <select value={selectedQuarter} onChange={(e) => setSelectedQuarter(e.target.value)} className="bg-transparent text-[#1d1d1f] outline-none font-semibold cursor-pointer">
+                {quarterOptions.map((q) => (
+                  <option key={q} value={q}>{q}</option>
+                ))}
+              </select>
+              <ChevronDown size={12} className="text-[#6e6e73]" />
+            </>
+          )}
+          {timeHorizon === "custom" && (
+            <div className="flex items-center gap-1.5 font-semibold">
+              <input 
+                type="date" 
+                value={customRange.start} 
+                onChange={(e) => setCustomRange({ ...customRange, start: e.target.value })} 
+                className="bg-transparent text-[#1d1d1f] outline-none border-0 p-0 text-xs w-[100px] cursor-pointer"
+              />
+              <span className="text-[#a1a1a6]">to</span>
+              <input 
+                type="date" 
+                value={customRange.end} 
+                onChange={(e) => setCustomRange({ ...customRange, end: e.target.value })} 
+                className="bg-transparent text-[#1d1d1f] outline-none border-0 p-0 text-xs w-[100px] cursor-pointer"
+              />
+            </div>
+          )}
+        </div>
+        
+      </div>
     </div>
   );
 }
@@ -1904,7 +1908,61 @@ function PlannedModulePage({ title, subtitle, features, setActive }) {
   );
 }
 
+function PasskeyGate({ onAuthenticate }) {
+  const [input, setInput] = useState("");
+  const [error, setError] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (input === "B2CJAYA") {
+      onAuthenticate();
+    } else {
+      setError(true);
+      setTimeout(() => setError(false), 2000);
+      setInput("");
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md p-4 font-sans transition-all">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        className="w-full max-w-sm rounded-[32px] bg-white/70 p-8 shadow-2xl backdrop-blur-2xl ring-1 ring-white/50 text-center"
+      >
+        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-3xl bg-black text-white shadow-lg">
+          <Lock size={24} />
+        </div>
+        <h1 className="text-2xl font-semibold tracking-tight text-[#1d1d1f]">Dashboard Locked</h1>
+        <p className="mt-2 text-sm leading-6 text-[#6e6e73]">
+          Please enter your passkey to securely access MAPID B2C.
+        </p>
+
+        <form onSubmit={handleSubmit} className="mt-8">
+          <div className="relative">
+            <input 
+              type="password" 
+              value={input} 
+              onChange={(e) => setInput(e.target.value)} 
+              placeholder="Enter passkey"
+              className={`w-full rounded-2xl bg-white/80 px-4 py-4 text-center text-lg tracking-[0.2em] text-[#1d1d1f] shadow-inner outline-none transition-all placeholder:tracking-normal ${error ? "ring-2 ring-rose-500 bg-rose-50/80 text-rose-600" : "focus:ring-2 focus:ring-black/20"}`}
+              autoFocus
+            />
+          </div>
+          <button 
+            type="submit"
+            className="mt-4 w-full rounded-full bg-black py-4 text-sm font-semibold text-white shadow-md transition hover:bg-black/90 active:scale-[0.98]"
+          >
+            Unlock Dashboard
+          </button>
+        </form>
+      </motion.div>
+    </div>
+  );
+}
+
 export default function B2CKPIDashboardPrototype() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [active, setActive] = useState("home");
   const [weekId, setWeekId] = useState("w3");
   const [roles, setRoles] = useState([]);
@@ -2102,23 +2160,30 @@ export default function B2CKPIDashboardPrototype() {
     );
   }
 
+  if (!isAuthenticated) {
+    return <PasskeyGate onAuthenticate={() => setIsAuthenticated(true)} />;
+  }
+
+  const isKpiPage = ["dashboard", "tracking", "history", "weekly", "monthly", "setup"].includes(active);
+
   return (
     <div className="min-h-screen bg-[#f5f5f7] font-sans text-[#1d1d1f]">
-      <Header 
-        active={active} 
-        setActive={setActive} 
-        weekId={weekId} 
-        setWeekId={setWeekId} 
-        weeks={weeks}
-        timeHorizon={timeHorizon}
-        setTimeHorizon={setTimeHorizon}
-        selectedMonth={selectedMonth}
-        setSelectedMonth={setSelectedMonth}
-        selectedQuarter={selectedQuarter}
-        setSelectedQuarter={setSelectedQuarter}
-        customRange={customRange}
-        setCustomRange={setCustomRange}
-      />
+      <Header active={active} setActive={setActive} />
+      {isKpiPage && (
+        <FilterBar 
+          weekId={weekId} 
+          setWeekId={setWeekId} 
+          weeks={weeks}
+          timeHorizon={timeHorizon}
+          setTimeHorizon={setTimeHorizon}
+          selectedMonth={selectedMonth}
+          setSelectedMonth={setSelectedMonth}
+          selectedQuarter={selectedQuarter}
+          setSelectedQuarter={setSelectedQuarter}
+          customRange={customRange}
+          setCustomRange={setCustomRange}
+        />
+      )}
       {actionError && (
         <div className="mx-auto mt-4 max-w-7xl px-6">
           <div className="rounded-[20px] bg-rose-50 text-rose-800 p-4 text-sm leading-6 ring-1 ring-rose-200 flex items-center justify-between shadow-sm">
